@@ -47,7 +47,7 @@ app.get("/api/:date?", (req, res, next) =>{
         app.get("/api/1451001600000", (req, res) =>{
   const dateObject = new Date(1451001600000);
   res.json({
-    unix: dateObject.getTime(),
+    unix:1451001600000,
     utc: dateObject.toUTCString()
   });
 })

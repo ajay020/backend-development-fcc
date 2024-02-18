@@ -37,7 +37,7 @@ app.get("/api/:date?", (req, res, next) =>{
   }
 
   if(isValidDate(date)){
-      return res.json({unix: new Date(date).valueOf(),utc: new Date(date).toISOString });
+      return res.json({unix: new Date(date).valueOf(),utc: new Date(date).toString });
   }
 
   res.json({error: "Invalid date"});

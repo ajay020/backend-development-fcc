@@ -25,10 +25,15 @@ app.get('/api/hello', function (req, res) {
 });
 
 app.get("/api/whoami", (req, res) =>{
+
+  const ipaddress = req.ip;
+  const language = req.headers['accept-language'];
+  const software = req.headers['user-agent']; 
+
   res.json({
-    ipaddress: req.ip, 
-    language: req.language,
-    software: req.software
+    ipaddress, 
+    language,
+    software
   });
 })
 

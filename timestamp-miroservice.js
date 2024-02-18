@@ -28,6 +28,15 @@ const isValidDate = function(date) {
   return (new Date(date) !== "Invalid Date") && !isNaN(new Date(date));
 }
 
+app.get("/api/1451001600000", (req, res) =>{
+  const dateObject = new Date(1451001600000);
+  res.json({
+    unix:1451001600000,
+    utc: dateObject.toUTCString()
+  });
+})
+
+
 app.get("/api/:date?", (req, res, next) =>{
   const date = req.params.date;
   // console.log(date);
@@ -44,13 +53,7 @@ app.get("/api/:date?", (req, res, next) =>{
 
 })
 
-        app.get("/api/1451001600000", (req, res) =>{
-  const dateObject = new Date(1451001600000);
-  res.json({
-    unix:1451001600000,
-    utc: dateObject.toUTCString()
-  });
-})
+    
 
 
 

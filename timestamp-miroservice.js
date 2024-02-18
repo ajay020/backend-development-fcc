@@ -33,11 +33,11 @@ app.get("/api/:date?", (req, res, next) =>{
   // console.log(date);
 
   if(date === undefined){
-    return res.json({unix: new Date().valueOf(),utc: new Date().toString() });
+    return res.json({unix: new Date().valueOf(),utc: new Date().toUTCString() });
   }
 
   if(isValidDate(date)){
-      return res.json({unix: new Date(date).valueOf(),utc: new Date(date).toString });
+      return res.json({unix: new Date(date).valueOf(),utc: new Date(date).toUTCString });
   }
 
   res.json({error: "Invalid date"});

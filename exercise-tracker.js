@@ -30,6 +30,17 @@ const userSchema  = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+
+// create exercise modal
+const exerciseSchema = new mongoose.Schema({
+  username: {type:String},
+  description: {type:String, required: true},
+  duration: {type: Number, required: true },
+  date: {type : Date}
+});
+
+const Exercise = mongoose.model('Exercise', exerciseSchema);
+
 app.get("/api/users", async function (req, res){
     let users  = await User.find();
     res.send(users);
@@ -44,47 +55,77 @@ app.post("/api/users", async function (req, res){
     try {
        let user = new User({username});
        const savedUser = await user.save();
-    console.log(savedUser);
-
        res.json(savedUser);
-
     } catch (error) {
       console.log(error);
     }
 })
 
+
+async function updateDates() {
+  try {
+    const exercises = await Exercise.find();
+
+    for (const exercise of exercises) {
+      exercise.date = new Date(exercise.date);
+      await exercise.save();
+    }
+
+    console.log('All dates updated successfully');
+  } catch (error) {
+    console.error('Error updating dates:', error);
+  }
+}
+
+
 app.post("/api/users/:_id/exercises", async function (req, res){ 
-    let {_id, description, duration, date} = req.body;  
-    // console.log(req.params._id);
+    let { description, duration, date} = req.body;  
+    // console.log(typeof duration);
 
     if(!description || !duration){
       return res.json({error: "Invalid input"});
     }
 
     if(date){
-      date = new Date(date).toDateString();
+      date = new Date(date);
     }else{
-      date = new Date().toDateString();
+      date = new Date();
     }
 
     try {
       let user = await User.findById(req.params._id);
-      let exercise = new Exercise({username: user.username, description, duration, date});
+      let exercise = new Exercise({username: user.username, description, duration: parseInt(duration), date});
       // console.log(exercise);
       const savedExercise = await exercise.save();
+      console.log(savedExercise);
       // 65d2e48d893dc189c1c44827
       res.json(
        { username: user.username, 
-        _id: user._id, 
+        _id: req.params._id, 
         description,
-        duration,
-        date }
+        duration: parseInt(duration),
+        date : date.toDateString()
+      }
        );
     } catch (error) {
        console.log(error);
     }
 })
 
+// {
+//   "_id": "612109b0f5860e05a3652f71",
+//   "username": "fcc_test_16295551193",
+//   "from": "Mon Nov 02 2020",
+//   "to": "Mon Feb 12 2024",
+//   "count": 1,
+//   "log": [
+//   {
+//   "description": "BACS",
+//   "duration": 443950345034,
+//   "date": "Mon Aug 21 2023"
+//   }
+//   ]
+//   }
 
 app.get("/api/users/:_id/logs", async (req, res)=>{
     const  userId = req.params._id;
@@ -99,25 +140,33 @@ app.get("/api/users/:_id/logs", async (req, res)=>{
 
        let query = { username: user.username };
 
-       // Add date range filter if 'from' and 'to' are provided
-       if (from && to) {
-           query.date = { $gte: new Date(from), $lte: new Date(to) };
-       }
+      // Convert date strings to JavaScript Date objects
+      let fromDate = from ? new Date(from) : null;
+      let toDate = to ? new Date(to) : null;
 
-       // Apply limit if provided
-       let options = {};
-       if (limit) {
-           options.limit = parseInt(limit);
-       }
+      // Add date range filter if 'from' and 'to' are provided
+      if (fromDate && toDate) {
+          query.date = { $gte: fromDate, $lte: toDate };
+      } else if (fromDate) {
+          query.date = { $gte: fromDate };
+      } else if (toDate) {
+          query.date = { $lte: toDate };
+      }
+
+      // Apply limit if provided
+      let options = {};
+      if (limit) {
+          options.limit = parseInt(limit);
+      }
 
        const user_exercise = await Exercise.find(query, {}, options);
 
        const logs = user_exercise.map(ex => ({
          description: ex.description,
-          duration: ex.duration,
-           date: ex.date}))
+          duration: parseInt (ex.duration),
+           date: ex.date.toDateString()}))
 
-     let result = {
+       let result = {
         _id: userId,
         username: user?.username, 
         count: user_exercise.length,
@@ -125,7 +174,7 @@ app.get("/api/users/:_id/logs", async (req, res)=>{
        }    
 
        if(from && to){
-           result.from = new Date(from).toDateString();
+          result.from = new Date(from).toDateString();
           result.to = new Date(to).toDateString();
        }
 
@@ -135,7 +184,7 @@ app.get("/api/users/:_id/logs", async (req, res)=>{
         console.log(error);
     }
 })
-                         
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)

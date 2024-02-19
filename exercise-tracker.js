@@ -85,18 +85,11 @@ app.post("/api/users/:_id/exercises", async function (req, res){
     }
 })
 
-// {
-//   username: "fcc_test",
-//   count: 1,
-//   _id: "5fb5853f734231456ccb3b05",
-//   log: [{
-//     description: "test",
-//     duration: 60,
-//     date: "Mon Jan 01 1990",
-//   }]
-// }
+
 app.get("/api/users/:_id/logs", async (req, res)=>{
     const  userId = req.params._id;
+    const { from, to, limit } = req.query;
+
     try {
        const user = await User.findById(userId);
 
@@ -104,9 +97,25 @@ app.get("/api/users/:_id/logs", async (req, res)=>{
         return res.json({error: "No user with id: " + userId });
        }
 
-       const user_exercise = await Exercise.find({username: user?.username});
+       let query = { username: user.username };
 
-       const logs = user_exercise.map(ex => ({ description: ex.description, duration: ex.duration, date: ex.date}))
+       // Add date range filter if 'from' and 'to' are provided
+       if (from && to) {
+           query.date = { $gte: new Date(from), $lte: new Date(to) };
+       }
+
+       // Apply limit if provided
+       let options = {};
+       if (limit) {
+           options.limit = parseInt(limit);
+       }
+
+       const user_exercise = await Exercise.find(query, {}, options);
+
+       const logs = user_exercise.map(ex => ({
+         description: ex.description,
+          duration: ex.duration,
+           date: ex.date}))
 
        res.json({
         _id: userId,

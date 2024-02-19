@@ -85,6 +85,41 @@ app.post("/api/users/:_id/exercises", async function (req, res){
     }
 })
 
+// {
+//   username: "fcc_test",
+//   count: 1,
+//   _id: "5fb5853f734231456ccb3b05",
+//   log: [{
+//     description: "test",
+//     duration: 60,
+//     date: "Mon Jan 01 1990",
+//   }]
+// }
+app.get("/api/users/:_id/logs", async (req, res)=>{
+    const  userId = req.params._id;
+    try {
+       const user = await User.findById(userId);
+
+       if(!user){
+        return res.json({error: "No user with id: " + userId });
+       }
+
+       const user_exercise = await Exercise.find({username: user?.username});
+
+       const logs = user_exercise.map(ex => ({ description: ex.description, duration: ex.duration, date: ex.date}))
+
+       res.json({
+        _id: userId,
+        username: user?.username, 
+        count: user_exercise.length,
+        log: [...logs]
+       })
+
+    } catch (error) {
+        console.log(error);
+    }
+})
+                         
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)

@@ -74,10 +74,11 @@ app.post("/api/users/:_id/exercises", async function (req, res){
       const savedExercise = await exercise.save();
       // 65d2e48d893dc189c1c44827
       res.json(
-        ...user,
+       { username: user.username, 
+        _id: user._id, 
         description,
         duration,
-        date 
+        date }
        );
     } catch (error) {
        console.log(error);

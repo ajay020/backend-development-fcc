@@ -53,8 +53,35 @@ app.post("/api/users", async function (req, res){
     }
 })
 
-app.post("/api/users/:_id/exercises", function (req, res){ 
-   
+app.post("/api/users/:_id/exercises", async function (req, res){ 
+    let {_id, description, duration, date} = req.body;  
+    // console.log(req.params._id);
+
+    if(!description || !duration){
+      return res.json({error: "Invalid input"});
+    }
+
+    if(date){
+      date = new Date(date).toDateString();
+    }else{
+      date = new Date().toDateString();
+    }
+
+    try {
+      let user = await User.findById(req.params._id);
+      let exercise = new Exercise({username: user.username, description, duration, date});
+      // console.log(exercise);
+      const savedExercise = await exercise.save();
+      // 65d2e48d893dc189c1c44827
+      res.json(
+        ...user,
+        description,
+        duration,
+        date 
+       );
+    } catch (error) {
+       console.log(error);
+    }
 })
 
 

@@ -117,12 +117,19 @@ app.get("/api/users/:_id/logs", async (req, res)=>{
           duration: ex.duration,
            date: ex.date}))
 
-       res.json({
+     let result = {
         _id: userId,
         username: user?.username, 
         count: user_exercise.length,
         log: [...logs]
-       })
+       }    
+
+       if(from && to){
+          result.from = new Date(from);
+          result.to = new Date(to);
+       }
+
+       res.json(result)
 
     } catch (error) {
         console.log(error);

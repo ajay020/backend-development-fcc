@@ -125,8 +125,8 @@ app.get("/api/users/:_id/logs", async (req, res)=>{
        }    
 
        if(from && to){
-          result.from = new Date(from);
-          result.to = new Date(to);
+           result.from = new Date(from).toDateString();
+          result.to = new Date(to).toDateString();
        }
 
        res.json(result)
